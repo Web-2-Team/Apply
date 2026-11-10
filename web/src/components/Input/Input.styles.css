@@ -1,0 +1,32 @@
+.common-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.common-input-label {
+  color: #4b5875;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.common-input-field {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #dce2ec;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #1b263b;
+  font-size: 14px;
+}
+
+.common-input-field:focus {
+  border-color: #5145e5;
+  outline: 2px solid rgba(81, 69, 229, 0.2);
+}
+
+.common-input-field:disabled {
+  background-color: #f1f3f7;
+  cursor: not-allowed;
+}
