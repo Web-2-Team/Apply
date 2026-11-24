@@ -1,0 +1,80 @@
+.postings-page {
+  width: min(100% - 40px, 900px);
+  margin: 0 auto;
+  padding: 24px 0 48px;
+}
+
+.postings-page h1 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.postings-page p {
+  margin: 8px 0 12px;
+  color: var(--secondary);
+  line-height: 1.5;
+}
+
+.postings-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.postings-section {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.postings-section h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.postings-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.postings-card h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.postings-card h3 a {
+  color: inherit;
+}
+
+.postings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.postings-page .common-button {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.postings-page .common-button--secondary {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--secondary);
+}
+
+.postings-application-copy dt {
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.postings-application-copy dd {
+  margin: 4px 0 0;
+  color: var(--secondary);
+  white-space: pre-wrap;
+}

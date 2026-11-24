@@ -1,4 +1,3 @@
-import colors from '../../styles/colors';
 import './Button.styles.css';
 
 function CommonButton({

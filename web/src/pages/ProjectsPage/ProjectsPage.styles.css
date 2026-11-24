@@ -1,0 +1,25 @@
+.projects-content { width: min(100% - 70px, 1020px); margin: 0 auto; padding: 115px 0 60px; }
+.projects-title-block { margin-bottom: 18px; }
+.projects-title-block h1 { margin: 0; color: #17233c; font-size: 21px; font-weight: 750; }
+.projects-title-block p { margin: 9px 0 0; color: #687891; font-size: 10px; }
+.projects-filters { display: flex; min-height: 35px; align-items: center; gap: 8px; padding: 5px 10px; border: 1px solid #e1e7f0; border-radius: 9px; background: #fff; }
+.projects-filters > span { margin-right: 8px; color: #76849c; font-size: 8px; }
+.projects-filters select { min-width: 81px; height: 22px; padding: 0 22px 0 8px; border: 0; border-radius: 14px; outline-color: #6658ec; appearance: none; background: #f3f5f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Cpath d='m2 3.5 2.5 2 2.5-2' fill='none' stroke='%23687991' stroke-width='1'/%3E%3C/svg%3E") no-repeat right 8px center; color: #53647f; font-family: inherit; font-size: 8px; }
+.projects-filters select:nth-of-type(2) { min-width: 74px; }
+.projects-filters select:nth-of-type(3) { min-width: 81px; }
+.projects-reset { padding: 4px 0; border: 0; background: transparent; color: #5749df; cursor: pointer; font-family: inherit; font-size: 8px; }
+.projects-section-heading { display: flex; align-items: center; gap: 18px; margin: 14px 0 11px; }
+.projects-section-heading h2 { margin: 0; color: #17233c; font-size: 13px; font-weight: 750; }
+.projects-section-heading > span { color: #8995a9; font-size: 8px; }
+.projects-empty { grid-column: 1 / -1; padding: 30px; color: #73819a; text-align: center; }
+@media (min-width: 1400px) { .projects-content { width: min(100% - 90px, 1180px); padding-top: 150px; } }
+@media (max-width: 760px) {
+  .projects-content { width: calc(100% - 30px); padding-top: 65px; }
+}
+@media (max-width: 500px) {
+  .projects-content { padding-top: 36px; }
+  .projects-title-block h1 { font-size: 19px; }
+  .projects-filters { flex-wrap: wrap; gap: 5px; }
+  .projects-filters > span { margin-right: 0; }
+  .projects-filters select:nth-of-type(n) { flex: 1; min-width: 0; }
+}

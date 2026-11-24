@@ -1,0 +1,20 @@
+.project-bookmark.common-button {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--secondary);
+}
+
+.project-bookmark.common-button:hover,
+.project-bookmark.common-button[aria-pressed='true'] {
+  border-color: var(--brand);
+  background: var(--brand-subtle);
+  color: var(--brand);
+}
+
+.project-bookmark[aria-pressed='true'] svg {
+  fill: currentColor;
+}

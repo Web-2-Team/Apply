@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import CommonInput from "../../components/Input/Input";
-import CommonButton from "../../components/Button /Button";
+import CommonButton from "../../components/Button/Button";
+import { routes } from "../../router/routes";
 import "./LoginPage.styles.css";
 
 function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    console.log("이메일:", email);
+    navigate(routes.projects);
   };
 
   return (
@@ -18,15 +18,13 @@ function LoginPage() {
       <div className="login-container">
         <h1>로그인</h1>
         <p className="login-description">
-          계정에 로그인하고 프로젝트를 이어가세요.
+          데모용 이메일과 비밀번호를 입력하면 프로젝트를 둘러볼 수 있어요.
         </p>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit} autoComplete="off">
           <CommonInput
             label="이메일"
             type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
             placeholder="name@example.com"
             required
           />
@@ -34,23 +32,21 @@ function LoginPage() {
           <CommonInput
             label="비밀번호"
             type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="비밀번호를 입력해 주세요"
+            placeholder="데모용 비밀번호를 입력해 주세요"
             required
           />
 
-          <a className="login-link" href="/forgot-password">
+          <Link className="login-link" to={routes.forgotPassword}>
             비밀번호를 잊으셨나요?
-          </a>
+          </Link>
 
-          <CommonButton type="submit">로그인</CommonButton>
+          <CommonButton type="submit">데모 로그인</CommonButton>
         </form>
 
         <p className="signup-text">아직 계정이 없으신가요?</p>
-        <a className="login-link" href="/signup">
+        <Link className="login-link" to={routes.signup}>
           회원가입
-        </a>
+        </Link>
       </div>
     </main>
   );

@@ -1,0 +1,34 @@
+.applications-content { width: min(100% - 70px, 1020px); margin: 0 auto; padding: 22px 0 56px; }
+.applications-breadcrumb { margin: 0 0 14px; color: #5d718c; font-size: 8px; }
+.applications-content > h1 { margin: 0; color: #163453; font-size: 21px; font-weight: 750; letter-spacing: -.3px; }
+.applications-description { margin: 7px 0 21px; color: #526985; font-size: 10px; }
+.applications-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; }
+.applications-summary article { display: grid; min-height: 69px; align-content: center; gap: 8px; padding: 10px 12px; border: 1px solid #dfe6f0; border-radius: 11px; background: #fff; }
+.applications-summary article span { color: #607794; font-size: 8px; }
+.applications-summary article strong { color: #173657; font-size: 15px; line-height: 1; }
+.applications-list-heading { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 14px; }
+.applications-list-heading h2 { margin: 0; color: #183858; font-size: 13px; font-weight: 750; }
+.applications-list-heading > span { color: #455d7a; font-size: 8px; }
+.applications-list { display: grid; gap: 12px; }
+.application-item { display: flex; min-height: 60px; align-items: center; gap: 22px; padding: 10px 12px; border: 1px solid #dfe6f0; border-radius: 11px; background: #fff; }
+.application-copy { display: grid; flex: 1; gap: 5px; }
+.application-copy h3 { margin: 0; color: #173657; font-size: 10px; font-weight: 700; }
+.application-copy time { color: #526985; font-size: 8px; }
+.application-post-link { color: #344e6b; font-size: 8px; text-decoration: none; white-space: nowrap; }
+.application-post-link:hover { color: #5145e5; text-decoration: underline; }
+.application-status { display: grid; width: 84px; min-height: 24px; place-items: center; border-radius: 15px; color: #19435d; font-size: 8px; font-weight: 700; }
+.application-status.review { background: #e2f5fb; }
+.application-status.accepted { background: #e2f6ed; }
+.application-status.rejected { background: #ffeded; }
+@media (max-width: 760px) {
+  .applications-content { width: calc(100% - 30px); }
+  .applications-summary { gap: 7px; }
+  .applications-summary article { padding-inline: 8px; }
+  .application-item { gap: 10px; }
+}
+@media (max-width: 480px) {
+  .applications-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .application-item { flex-wrap: wrap; }
+  .application-copy { flex-basis: 100%; }
+  .application-status { width: 74px; }
+}
