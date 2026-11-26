@@ -64,6 +64,16 @@ function Workspace({ scope, projectApi, apiUserId }) {
     if (!projectApi || apiUserId) saveWorkspace(storedWorkspace, scope);
   }, [storedWorkspace, scope, projectApi, apiUserId]);
 
+  function savePostingDraft(draftKey, draft) {
+    const updated = {
+      ...storedWorkspace,
+      postingDrafts: { ...storedWorkspace.postingDrafts, [draftKey]: draft },
+    };
+    if (!saveWorkspace(updated, scope)) return false;
+    setWorkspace(updated);
+    return true;
+  }
+
   const requestPublisherMode = (destination = routes.postings) =>
     setModeSwitch({ mode: "publisher", destination });
 
@@ -209,6 +219,7 @@ function Workspace({ scope, projectApi, apiUserId }) {
           context={{
             workspace,
             setWorkspace,
+            savePostingDraft,
             requestPublisherMode,
             openProjects,
             projectApi,
@@ -253,7 +264,7 @@ function WorkspaceLayout() {
       projectApiBaseUrl
         ? createProjectApi({
             baseUrl: projectApiBaseUrl,
-            getAccessToken: () => session?.accessToken,
+            getSession: () => session,
           })
         : null,
     [session],

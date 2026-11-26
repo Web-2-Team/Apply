@@ -12,10 +12,7 @@ import {
 import ProjectFilter from "./ProjectFilter";
 import "./ProjectsPage.styles.css";
 
-const categoryOptions = [
-  "전체 분야",
-  ...categories.filter((category) => category !== "리서치"),
-];
+const categoryOptions = ["전체 분야", ...categories];
 
 function ProjectsPage() {
   const {

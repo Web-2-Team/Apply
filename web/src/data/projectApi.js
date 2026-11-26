@@ -1,3 +1,5 @@
+import { projectIdString } from "./projectContract.js";
+
 const authMessage = "로그인이 필요합니다. 다시 로그인해 주세요.";
 
 const badRequestMessages = {
@@ -56,7 +58,7 @@ function idSegment(value) {
 
 export function createProjectApi({
   baseUrl = "",
-  getAccessToken,
+  getSession = () => null,
   fetcher = globalThis.fetch,
 }) {
   const projectUrl = `${baseUrl.trim().replace(/\/+$/, "")}/project`;
@@ -65,24 +67,26 @@ export function createProjectApi({
     action,
     method,
     path,
-    { payload, query, signal } = {},
+    { payload, query, signal, includeUserId = false } = {},
   ) {
-    const token = await getAccessToken();
-    if (!token?.trim()) {
+    const session = await getSession();
+    const token = session?.accessToken?.trim();
+    const userId = includeUserId ? projectIdString(session?.userId) : null;
+    if ((method !== "GET" && !token) || (includeUserId && !userId)) {
       throw new ProjectApiError(authMessage, {
         status: 401,
         code: "AUTH_REQUIRED",
       });
     }
 
-    const headers = {
-      Accept: "application/json",
-      Authorization: `Bearer ${token.trim()}`,
-    };
+    const headers = { Accept: "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
     const options = { method, headers, signal };
-    if (payload !== undefined) {
+    if (payload !== undefined || includeUserId) {
       headers["Content-Type"] = "application/json";
-      options.body = JSON.stringify(payload);
+      options.body = JSON.stringify(
+        includeUserId ? { ...payload, userId } : payload,
+      );
     }
 
     const search = query ? `?${new URLSearchParams(query)}` : "";
@@ -119,13 +123,17 @@ export function createProjectApi({
     list: ({ signal } = {}) => request("list", "GET", "/read", { signal }),
     read: async (id, { signal } = {}) =>
       request("read", "GET", `/read/${idSegment(id)}`, { signal }),
-    create: (payload) => request("create", "POST", "/create", { payload }),
+    create: (payload) =>
+      request("create", "POST", "/create", { payload, includeUserId: true }),
     update: async (id, payload) =>
-      request("update", "PATCH", `/update/${idSegment(id)}`, { payload }),
+      request("update", "PUT", `/update/${idSegment(id)}`, { payload }),
     remove: async (id) =>
       request("remove", "DELETE", `/delete/${idSegment(id)}`),
     apply: async (id, spec) =>
-      request("apply", "POST", `/apply/${idSegment(id)}`, { query: { spec } }),
+      request("apply", "POST", `/apply/${idSegment(id)}`, {
+        query: { spec },
+        includeUserId: true,
+      }),
     decide: async (id, userId, passed) =>
       request(
         "decide",

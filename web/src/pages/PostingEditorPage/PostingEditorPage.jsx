@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
   useNavigate,
@@ -14,6 +14,7 @@ import { toProjectPayload } from "../../data/projectContract";
 import useProjectDetail from "../../data/useProjectDetail";
 import {
   categories,
+  createLocalId,
   getProjectCategories,
   getProjectRoles,
   localDate,
@@ -58,12 +59,14 @@ function PostingEditor({
   project,
   workspace,
   setWorkspace,
+  savePostingDraft,
   projectApi,
   projectList,
 }) {
   const navigate = useNavigate();
   const formRef = useRef(null);
   const submitting = useRef(false);
+  const editorActive = useRef(false);
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -76,7 +79,7 @@ function PostingEditor({
       ? savedRoles
       : [
           {
-            id: crypto.randomUUID(),
+            id: createLocalId(),
             title: initial.roleTitle ?? "",
             members: initial.members ?? 1,
           },
@@ -89,13 +92,20 @@ function PostingEditor({
     project?.deadline && project.deadline < today ? project.deadline : today;
   const action = project ? "공고 수정" : "공고 등록";
 
+  useLayoutEffect(() => {
+    editorActive.current = true;
+    return () => {
+      editorActive.current = false;
+    };
+  }, []);
+
   function clearFeedback() {
     setNotice("");
     setError("");
   }
 
   function addRole() {
-    const role = { id: crypto.randomUUID(), title: "", members: 1 };
+    const role = { id: createLocalId(), title: "", members: 1 };
     setRoleRows((rows) => [...rows, role]);
     clearFeedback();
   }
@@ -106,11 +116,12 @@ function PostingEditor({
   }
 
   function saveDraft() {
+    clearFeedback();
     const draft = readPosting(formRef.current, roleRows);
-    setWorkspace((current) => ({
-      ...current,
-      postingDrafts: { ...current.postingDrafts, [draftKey]: draft },
-    }));
+    if (!savePostingDraft(draftKey, draft)) {
+      setError("브라우저에 초안을 저장하지 못했어요.");
+      return;
+    }
     setNotice("임시 저장했어요.");
   }
 
@@ -148,6 +159,7 @@ function PostingEditor({
       ...values,
       roles,
     };
+    const submittedDraft = workspace.postingDrafts?.[draftKey];
     if (projectApi) {
       submitting.current = true;
       setSaving(true);
@@ -156,30 +168,38 @@ function PostingEditor({
         if (project) await projectApi.update(project.id, payload);
         else await projectApi.create(payload);
       } catch (requestError) {
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : "공고를 저장하지 못했어요. 다시 시도해 주세요.",
-        );
+        if (editorActive.current) {
+          setError(
+            requestError instanceof Error
+              ? requestError.message
+              : "공고를 저장하지 못했어요. 다시 시도해 주세요.",
+          );
+        }
         return;
       } finally {
         submitting.current = false;
-        setSaving(false);
+        if (editorActive.current) setSaving(false);
       }
       projectList.reload();
     }
 
-    const postingId = projectApi ? null : (project?.id ?? crypto.randomUUID());
+    const postingId = projectApi ? null : (project?.id ?? createLocalId());
     setWorkspace((current) => {
       const updated = projectApi
         ? current
         : savePosting(current, { ...posting, id: postingId });
       if (!projectApi && updated === current) return current;
+      if (
+        !submittedDraft ||
+        updated.postingDrafts?.[draftKey] !== submittedDraft
+      ) {
+        return updated;
+      }
       const postingDrafts = { ...current.postingDrafts };
       delete postingDrafts[draftKey];
       return { ...updated, postingDrafts };
     });
-    navigate(routes.postings);
+    if (editorActive.current) navigate(routes.postings);
   }
 
   return (
@@ -416,7 +436,7 @@ function PostingEditor({
 }
 
 function PostingEditorPage() {
-  const { workspace, setWorkspace, projectApi, projectList } =
+  const { workspace, setWorkspace, savePostingDraft, projectApi, projectList } =
     useOutletContext();
   const { projectId } = useParams();
   const { project, loading, error, reload } = useProjectDetail(projectId);
@@ -462,6 +482,7 @@ function PostingEditorPage() {
         project={project}
         workspace={workspace}
         setWorkspace={setWorkspace}
+        savePostingDraft={savePostingDraft}
         projectApi={projectApi}
         projectList={projectList}
       />

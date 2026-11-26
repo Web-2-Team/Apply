@@ -3,6 +3,7 @@ import test from "node:test";
 import { createProjectApi, ProjectApiError } from "../src/data/projectApi.js";
 
 const baseUrl = "https://api.example.test/v1";
+const session = { accessToken: "test-token", userId: "7" };
 const posting = {
   title: "제목",
   subtitle: "한 줄 소개",
@@ -34,14 +35,14 @@ test("명세의 공고 요청 7개를 전송한다", async (t) => {
       result: detail,
     },
     {
-      call: (api) => api.create(posting),
+      call: (api) => api.create({ ...posting, userId: "99" }),
       method: "POST",
       path: "/create",
-      body: posting,
+      body: { ...posting, userId: session.userId },
     },
     {
       call: (api) => api.update(1, posting),
-      method: "PATCH",
+      method: "PUT",
       path: "/update/1",
       body: posting,
     },
@@ -50,6 +51,7 @@ test("명세의 공고 요청 7개를 전송한다", async (t) => {
       call: (api) => api.apply(1, "UI/UX +"),
       method: "POST",
       path: "/apply/1?spec=UI%2FUX+%2B",
+      body: { userId: session.userId },
     },
     {
       call: (api) => api.decide(1, "9223372036854775807", false),
@@ -74,7 +76,7 @@ test("명세의 공고 요청 7개를 전송한다", async (t) => {
       );
       const api = createProjectApi({
         baseUrl: `${baseUrl}/`,
-        getAccessToken: () => "test-token",
+        getSession: () => session,
         fetcher,
       });
 
@@ -98,38 +100,59 @@ test("명세의 공고 요청 7개를 전송한다", async (t) => {
   }
 });
 
-test("요청마다 현재 토큰을 확인하고 토큰이 없으면 전송하지 않는다", async (t) => {
-  let token;
+test("공개 조회는 세션 없이 전송하고 쓰기 요청은 로그인한 사용자를 요구한다", async (t) => {
+  let currentSession;
   const fetcher = t.mock.fn(() => Response.json([]));
-  const api = createProjectApi({ getAccessToken: () => token, fetcher });
+  const api = createProjectApi({ getSession: () => currentSession, fetcher });
 
-  await assert.rejects(api.list(), {
+  const authError = {
     name: "ProjectApiError",
     status: 401,
     code: "AUTH_REQUIRED",
-  });
+  };
+  const writes = [
+    () => api.create(posting),
+    () => api.update(1, posting),
+    () => api.remove(1),
+    () => api.apply(1, "FE"),
+    () => api.decide(1, 7, false),
+  ];
+  for (const write of writes) await assert.rejects(write(), authError);
   assert.equal(fetcher.mock.callCount(), 0);
 
-  token = "first";
   await api.list();
-  token = "renewed";
-  await api.list();
+  await api.read(1);
+  assert.deepEqual(
+    fetcher.mock.calls.map(({ arguments: [url, request] }) => [
+      url,
+      request.headers.Authorization,
+    ]),
+    [["/project/read", undefined], ["/project/read/1", undefined]],
+  );
 
-  assert.equal(fetcher.mock.calls[0].arguments[0], "/project/read");
-  assert.equal(
-    fetcher.mock.calls[0].arguments[1].headers.Authorization,
-    "Bearer first",
+  const userId = "9223372036854775807";
+  currentSession = { accessToken: "first", userId };
+  await api.apply(1, "FE");
+  currentSession = { accessToken: "renewed", userId: "8" };
+  await api.create(posting);
+  assert.deepEqual(
+    fetcher.mock.calls.slice(2).map(({ arguments: [, request] }) => [
+      request.headers.Authorization,
+      JSON.parse(request.body).userId,
+    ]),
+    [["Bearer first", userId], ["Bearer renewed", "8"]],
   );
-  assert.equal(
-    fetcher.mock.calls[1].arguments[1].headers.Authorization,
-    "Bearer renewed",
-  );
+
+  currentSession = { accessToken: "test", userId: "demo-user" };
+  await assert.rejects(api.create({ ...posting, userId: "7" }), authError);
+  await assert.rejects(api.apply(1, "FE"), authError);
+  assert.equal(fetcher.mock.callCount(), 4);
 });
 
 test("서버 실패 상태와 업무별 안내를 전달한다", async () => {
   let status = 400;
   const api = createProjectApi({
-    getAccessToken: () => "test",
+    getSession: () => session,
     fetcher: () => new Response(null, { status }),
   });
   const cases = [
@@ -152,7 +175,7 @@ test("서버 실패 상태와 업무별 안내를 전달한다", async () => {
 test("요청 취소와 통신·응답 오류를 구별한다", async () => {
   const abort = new DOMException("Aborted", "AbortError");
   const apiFor = (fetcher) =>
-    createProjectApi({ getAccessToken: () => "test", fetcher });
+    createProjectApi({ fetcher });
 
   await assert.rejects(
     apiFor(() => {
@@ -174,7 +197,7 @@ test("요청 취소와 통신·응답 오류를 구별한다", async () => {
 
 test("로컬 데이터 ID가 서버 요청에 들어가는 것을 막는다", async (t) => {
   const fetcher = t.mock.fn();
-  const api = createProjectApi({ getAccessToken: () => "test", fetcher });
+  const api = createProjectApi({ getSession: () => session, fetcher });
   await assert.rejects(api.remove("demo-project"), { code: "INVALID_ID" });
   await assert.rejects(api.decide(1, Number.MAX_SAFE_INTEGER + 1, true), {
     code: "INVALID_ID",

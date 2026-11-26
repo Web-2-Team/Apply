@@ -12,6 +12,7 @@ import WorkspaceDialog from "../../components/WorkspaceDialog/WorkspaceDialog";
 import useProjectDetail from "../../data/useProjectDetail";
 import {
   addApplication,
+  createLocalId,
   deadlineLabel,
   getProjectCategories,
   getProjectRoles,
@@ -82,8 +83,8 @@ function ApplicationForm({ project, role, onSubmit, onDismiss }) {
       return;
     }
 
-    onSubmit({
-      id: crypto.randomUUID(),
+    const submissionError = onSubmit({
+      id: createLocalId(),
       projectId: project.id,
       roleId: role.id,
       introduction,
@@ -92,6 +93,7 @@ function ApplicationForm({ project, role, onSubmit, onDismiss }) {
       date: localDate(),
       status: "review",
     });
+    if (submissionError) setError(submissionError);
   }
 
   return (
@@ -265,14 +267,23 @@ function ProjectDetailPage() {
   const deadlineTime = project.deadlineHour ? `${project.deadlineHour}:00` : "";
 
   function submitApplication(application) {
-    setWorkspace((current) => addApplication(current, application));
+    const updated = addApplication(workspace, application);
+    if (updated === workspace) {
+      return isRecruiting(project)
+        ? "지원서를 접수할 수 없어요. 이미 지원했는지 확인해 주세요."
+        : "모집이 마감되어 지원서를 제출할 수 없어요.";
+    }
+    setWorkspace(updated);
     setApplyingTo(null);
     navigate(routes.applications);
   }
 
   async function submitRemoteApplication() {
+    if (!isRecruiting(project)) {
+      throw new Error("모집이 마감되어 지원할 수 없어요.");
+    }
     const receipt = {
-      id: crypto.randomUUID(),
+      id: createLocalId(),
       projectId: project.id,
       projectTitle: project.title,
       roleId: selectedRole.id,
@@ -444,7 +455,6 @@ function ProjectDetailPage() {
         </aside>
       </div>
       {selectedRole &&
-        canApply &&
         (projectApi ? (
           <ApplicationConfirmation
             project={project}

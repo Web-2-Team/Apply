@@ -5,7 +5,12 @@ import {
   fromProjectList,
   toProjectPayload,
 } from "../src/data/projectContract.js";
-import { isRecruiting, localDate } from "../src/data/workspace.js";
+import {
+  addApplication,
+  createLocalId,
+  isRecruiting,
+  localDate,
+} from "../src/data/workspace.js";
 
 const project = {
   "project-id": 1,
@@ -101,4 +106,42 @@ test("서버 공고는 마감 시간부터 닫히고 데모 공고는 날짜 기
   assert.equal(isRecruiting({ ...posting, deadlineHour: "08" }), false);
   assert.equal(isRecruiting({ ...posting, deadlineHour: "09" }), true);
   assert.equal(isRecruiting(posting), true);
+});
+
+test("마감 전에 작성한 데모 지원서는 마감 후 상태에 추가되지 않는다", (context) => {
+  context.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date(2030, 10, 26, 23, 59),
+  });
+  const posting = {
+    id: "1",
+    category: "AI",
+    recruiting: true,
+    deadline: localDate(),
+  };
+  const workspace = {
+    mode: "applicant",
+    projects: [posting],
+    applications: [],
+    profile: { name: "테스트 사용자" },
+  };
+  const application = {
+    projectId: posting.id,
+    roleId: "default",
+    introduction: "작성한 내용",
+  };
+
+  assert.equal(addApplication(workspace, application).applications.length, 1);
+  context.mock.timers.setTime(Date.now() + 60_000);
+  assert.equal(addApplication(workspace, application), workspace);
+  assert.equal(application.introduction, "작성한 내용");
+});
+
+test("로컬 식별자는 randomUUID가 없는 환경에서도 생성할 수 있다", (context) => {
+  context.mock.method(globalThis.crypto, "randomUUID", () => {
+    throw new Error("HTTP에서 사용할 수 없는 기능");
+  });
+  const id = createLocalId();
+  assert.match(id, /^local-[0-9a-f]{32}$/);
+  assert.notEqual(createLocalId(), id);
 });

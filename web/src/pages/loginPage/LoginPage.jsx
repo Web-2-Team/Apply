@@ -28,15 +28,15 @@ function LoginPage() {
       <main className="login-page">
         <div className="login-container">
           <h1>로그인</h1>
-          {session ? (
-            <Link className="login-link" to={routes.projects}>
-              프로젝트로 이동
-            </Link>
-          ) : (
+          {!session && (
             <p className="login-description">
-              공고 API를 사용하려면 백엔드 로그인 연동이 필요해요.
+              공고는 바로 둘러볼 수 있어요. 공고 등록과 지원에는 로그인이
+              필요해요.
             </p>
           )}
+          <Link className="login-link" to={routes.projects}>
+            프로젝트 둘러보기
+          </Link>
         </div>
       </main>
     );

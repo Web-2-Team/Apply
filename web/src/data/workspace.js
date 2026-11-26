@@ -20,6 +20,12 @@ export const applicationStatuses = {
   rejected: { label: "불합격", tone: "rejected" },
 };
 
+export function createLocalId() {
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"));
+  return `local-${hex.join("")}`;
+}
+
 export function localDate(days = 0) {
   const date = new Date();
   date.setDate(date.getDate() + days);
