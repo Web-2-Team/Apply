@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from "react";
 import "./WorkspaceDialog.styles.css";
 
-function WorkspaceDialog({ title, onDismiss, children }) {
+function WorkspaceDialog({ title, onDismiss, children, className = "" }) {
   const dialogRef = useRef(null);
   const titleId = useId();
 
@@ -14,7 +14,7 @@ function WorkspaceDialog({ title, onDismiss, children }) {
   return (
     <dialog
       ref={dialogRef}
-      className="workspace-dialog"
+      className={`workspace-dialog ${className}`.trim()}
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();

@@ -4,10 +4,8 @@
 .project-heading-actions { display: flex; flex: none; align-items: center; gap: 8px; }
 .project-heading-row h1 { margin: 0; color: #17233c; font-size: 20px; font-weight: 730; letter-spacing: -.5px; }
 .project-subtitle { margin: 5px 0 11px; color: #7d899f; font-size: 10px; }
-.project-tags { display: flex; gap: 6px; }
+.project-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .project-tags span { min-width: 53px; padding: 5px 9px; border-radius: 14px; background: #f0edff; color: #6355ed; font-size: 9px; text-align: center; }
-.project-tags span:nth-child(2) { min-width: 65px; background: #e4f8fb; color: #18889e; }
-.project-tags span:nth-child(3) { background: transparent; color: #59667e; }
 .project-status { flex: 0 0 auto; margin-top: 2px; padding: 5px 13px; border-radius: 12px; background: #e3f5eb; color: #21805d; font-size: 9px; }
 .project-status-closed { background: #e7eaf1; color: var(--secondary); }
 .project-heading-row h1, .project-overview > p { overflow-wrap: anywhere; }
@@ -20,8 +18,10 @@
 .project-meta { display: flex; gap: 6px; margin-top: 12px; }
 .project-meta span { min-width: 76px; padding: 6px 9px; border-radius: 15px; background: #f4f6fa; color: #59667e; font-size: 9px; }
 .project-role-card { padding-bottom: 20px; }
+.project-role-list { display: grid; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.project-role-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
 .project-role-row { display: flex; min-height: 40px; align-items: center; gap: 12px; padding: 4px 8px; border-radius: 8px; background: #f8f9fc; }
-.project-role-copy { display: grid; gap: 4px; }
+.project-role-copy { display: grid; min-width: 0; gap: 4px; overflow-wrap: anywhere; }
 .project-role-copy strong { color: #27334c; font-size: 9px; }
 .project-role-copy span,.project-role-openings { color: #8490a5; font-size: 8px; }
 .project-role-openings { margin-left: auto; white-space: nowrap; }
@@ -49,7 +49,7 @@
   .project-heading-row { flex-wrap: wrap; gap: 8px; }
   .project-heading-row h1 { font-size: 17px; }
   .project-tags, .project-meta, .project-role-row, .project-stats { flex-wrap: wrap; }
-  .project-role-row { gap: 8px; }
-  .project-role-openings { display: none; }
+  .project-role-row { column-gap: 8px; }
+  .project-role-openings { margin-left: 0; }
   .project-apply-button.common-button { min-width: 76px; margin-left: auto; padding-inline: 10px; }
 }

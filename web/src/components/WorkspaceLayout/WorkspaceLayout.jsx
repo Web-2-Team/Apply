@@ -1,27 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { FiBookmark, FiBriefcase, FiClipboard, FiCompass, FiSearch, FiSettings, FiUser } from 'react-icons/fi';
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import CommonButton from '../Button/Button';
 import WorkspaceDialog from '../WorkspaceDialog/WorkspaceDialog';
-import { loadWorkspace, saveWorkspace } from '../../data/workspace';
+import { createProjectApi } from '../../data/projectApi';
+import { fromProjectList } from '../../data/projectContract';
+import { getProjectSession, projectApiBaseUrl, subscribeProjectSession } from '../../data/projectSession';
+import useProjectRequest from '../../data/useProjectRequest';
+import { getOwnApplications, loadWorkspace, saveWorkspace } from '../../data/workspace';
 import { routes } from '../../router/routes';
 import './WorkspaceLayout.styles.css';
 
-function WorkspaceLayout() {
-  const [workspace, setWorkspace] = useState(loadWorkspace);
+function Workspace({ scope, projectApi, apiUserId }) {
+  const [storedWorkspace, setWorkspace] = useState(() => loadWorkspace(scope));
+  const request = useMemo(() => projectApi
+    ? async (signal) => fromProjectList(await projectApi.list({ signal }), apiUserId)
+    : null, [projectApi, apiUserId]);
+  const { data: projects, ...projectList } = useProjectRequest(request);
+  const workspace = projectApi ? { ...storedWorkspace, projects: projects ?? [] } : storedWorkspace;
+
   const [modeSwitch, setModeSwitch] = useState(null);
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const onPostings = Boolean(useMatch(routes.postings));
+  const { pathname, search } = useLocation();
+  const onPostings = Boolean(useMatch(`${routes.postings}/*`));
   const isPublisher = workspace.mode === 'publisher';
+  const searchQuery = new URLSearchParams(search).get('q') ?? '';
   const name = workspace.profile.name;
-  const pendingCount = workspace.applications.filter(({ status }) => status === 'review').length;
+  const pendingCount = getOwnApplications(workspace).filter(({ status }) => status === 'review').length;
 
   useEffect(() => {
-    saveWorkspace(workspace);
-  }, [workspace]);
+    if (!projectApi || apiUserId) saveWorkspace(storedWorkspace, scope);
+  }, [storedWorkspace, scope, projectApi, apiUserId]);
 
-  const requestPublisherMode = () => setModeSwitch({ mode: 'publisher', destination: routes.postings });
+  const requestPublisherMode = (destination = routes.postings) => setModeSwitch({ mode: 'publisher', destination });
 
   function openProjects(event) {
     if (!isPublisher) return;
@@ -34,6 +45,15 @@ function WorkspaceLayout() {
     setWorkspace((current) => ({ ...current, mode }));
     setModeSwitch(null);
     if (destination && destination !== pathname) navigate(destination);
+  }
+
+  function submitSearch(event) {
+    event.preventDefault();
+    const query = new FormData(event.currentTarget).get('q').trim();
+    navigate({
+      pathname: isPublisher ? routes.postings : routes.projects,
+      search: query ? new URLSearchParams({ q: query }).toString() : '',
+    });
   }
 
   return (
@@ -62,7 +82,7 @@ function WorkspaceLayout() {
           </NavLink>
           <NavLink className="workspace-nav-item" to={routes.applications}>
             <FiClipboard className="workspace-icon" aria-hidden="true" />
-            내 지원 현황 <span className="workspace-nav-count">{pendingCount}</span>
+            내 지원 현황 {!projectApi && <span className="workspace-nav-count">{pendingCount}</span>}
           </NavLink>
           <NavLink className="workspace-nav-item" to={routes.savedProjects}>
             <FiBookmark className="workspace-icon" aria-hidden="true" />
@@ -96,10 +116,20 @@ function WorkspaceLayout() {
 
       <div className="workspace-main">
         <header className="workspace-topbar">
-          <label className="workspace-search">
-            <FiSearch className="workspace-icon" aria-hidden="true" />
-            <input type="search" placeholder="프로젝트, 분야, 키워드 검색" aria-label="프로젝트 검색" />
-          </label>
+          <form className="workspace-search" role="search" aria-label="상단 검색" onSubmit={submitSearch}>
+            <button type="submit" aria-label="검색 실행">
+              <FiSearch className="workspace-icon" aria-hidden="true" />
+            </button>
+            <input
+              key={searchQuery}
+              type="search"
+              name="q"
+              defaultValue={searchQuery}
+              maxLength={120}
+              placeholder={isPublisher ? '공고, 지원자 검색' : '프로젝트, 분야, 키워드 검색'}
+              aria-label={isPublisher ? '공고 또는 지원자 검색어' : '프로젝트 검색어'}
+            />
+          </form>
           <button
             type="button"
             className="workspace-user-mode"
@@ -117,7 +147,7 @@ function WorkspaceLayout() {
           </button>
         </header>
 
-        <Outlet context={{ workspace, setWorkspace, requestPublisherMode, openProjects }} />
+        <Outlet context={{ workspace, setWorkspace, requestPublisherMode, openProjects, projectApi, projectList, apiUserId }} />
       </div>
 
       {modeSwitch && (
@@ -133,6 +163,19 @@ function WorkspaceLayout() {
       )}
     </div>
   );
+}
+
+function WorkspaceLayout() {
+  const session = useSyncExternalStore(subscribeProjectSession, getProjectSession);
+  const projectApi = useMemo(() => projectApiBaseUrl ? createProjectApi({
+    baseUrl: projectApiBaseUrl,
+    getAccessToken: () => session?.accessToken,
+  }) : null, [session]);
+  const scope = projectApi
+    ? `apply-project-workspace:${projectApiBaseUrl}:${session?.userId ?? 'guest'}`
+    : undefined;
+
+  return <Workspace key={scope} scope={scope} projectApi={projectApi} apiUserId={session?.userId ?? null} />;
 }
 
 export default WorkspaceLayout;

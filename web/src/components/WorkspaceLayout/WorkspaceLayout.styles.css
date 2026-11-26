@@ -150,6 +150,20 @@
   outline: 2px solid var(--brand);
 }
 
+.workspace-search button {
+  display: grid;
+  height: 100%;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.workspace-search button:hover { color: var(--brand); }
+
 .workspace-search input {
   min-width: 0;
   width: 100%;

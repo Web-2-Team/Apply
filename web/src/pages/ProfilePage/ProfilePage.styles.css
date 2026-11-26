@@ -33,66 +33,6 @@
   gap: 14px;
 }
 
-.profile-major-field {
-  min-inline-size: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.profile-major-field legend {
-  margin-bottom: 8px;
-  padding: 0;
-}
-
-.profile-major-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.profile-major-chip {
-  position: relative;
-  max-width: 100%;
-}
-
-.profile-major-chip input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.profile-major-chip span {
-  display: block;
-  padding: 7px 13px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--secondary);
-  font-size: 13px;
-  line-height: 18px;
-  overflow-wrap: anywhere;
-}
-
-.profile-major-chip:hover span {
-  border-color: var(--brand);
-}
-
-.profile-major-chip input:checked + span {
-  border-color: var(--brand);
-  background: var(--brand-subtle);
-  color: var(--brand);
-}
-
-.profile-major-chip input:focus-visible + span {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-}
-
 .profile-settings-actions {
   display: flex;
   flex-wrap: wrap;

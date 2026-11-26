@@ -2,27 +2,15 @@ import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import CommonButton from '../../components/Button/Button';
 import CommonInput from '../../components/Input/Input';
+import BadgeChoices from '../../components/BadgeChoices/BadgeChoices';
+import { majorChoices } from '../../data/workspace';
 import './ProfilePage.styles.css';
-
-const majors = [
-  '프론트엔드',
-  '백엔드',
-  'UI/UX',
-  'AI',
-  '정보보안',
-  'Flutter',
-  '안드로이드',
-  'iOS',
-  'DevOps',
-];
 
 function ProfilePage() {
   const { workspace: { profile }, setWorkspace } = useOutletContext();
   const [feedback, setFeedback] = useState('');
   const [error, setError] = useState('');
-  const majorOptions = profile.major && !majors.includes(profile.major)
-    ? [...majors, profile.major]
-    : majors;
+  const majorOptions = [...new Set([...majorChoices, ...profile.majors])];
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -31,11 +19,15 @@ function ProfilePage() {
       name: form.get('name').trim(),
       studentId: form.get('studentId').trim(),
       email: form.get('email').trim(),
-      major: form.get('major')?.trim() ?? '',
+      majors: form.getAll('majors'),
     };
 
-    if (Object.values(nextProfile).some((value) => !value)) {
-      setError('실명, 학번, 이메일, 전공을 모두 입력해 주세요.');
+    if (!nextProfile.name || !nextProfile.studentId || !nextProfile.email) {
+      setError('실명, 학번, 이메일을 모두 입력해 주세요.');
+      return;
+    }
+    if (nextProfile.majors.length === 0) {
+      setError('전공을 하나 이상 선택해 주세요.');
       return;
     }
 
@@ -56,17 +48,7 @@ function ProfilePage() {
           <CommonInput label="실명" name="name" defaultValue={profile.name} autoComplete="name" maxLength={50} required />
           <CommonInput label="학번" name="studentId" defaultValue={profile.studentId} maxLength={30} required />
           <CommonInput label="이메일" name="email" type="email" defaultValue={profile.email} autoComplete="email" maxLength={254} required />
-          <fieldset className="profile-major-field">
-            <legend className="common-input-label">전공</legend>
-            <div className="profile-major-options">
-              {majorOptions.map((major) => (
-                <label className="profile-major-chip" key={major}>
-                  <input type="radio" name="major" value={major} defaultChecked={major === profile.major} required />
-                  <span>{major}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <BadgeChoices label="전공" name="majors" options={majorOptions} defaultValues={profile.majors} />
           {error && <p className="profile-settings-error" role="alert">{error}</p>}
           <div className="profile-settings-actions">
             <CommonButton type="submit">저장</CommonButton>

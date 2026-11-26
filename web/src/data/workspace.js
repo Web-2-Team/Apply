@@ -1,7 +1,10 @@
 const storageKey = 'apply-workspace-v1';
 
-export const categories = ['프론트엔드', 'UI/UX', '리서치', '백엔드'];
-const defaultProfile = { name: '김지우', studentId: '', email: '', major: '' };
+export const majorChoices = [
+  '프론트엔드', '백엔드', 'UI/UX', 'AI', '정보보안', 'Flutter', '안드로이드', 'iOS', 'DevOps',
+];
+export const categories = [...majorChoices, '리서치'];
+const defaultProfile = { name: '김지우', studentId: '', email: '', majors: [] };
 
 export const applicationStatuses = {
   review: { label: '검토 중', tone: 'review' },
@@ -22,13 +25,49 @@ function daysUntil(deadline) {
 }
 
 export function isRecruiting(project) {
-  return project.recruiting && daysUntil(project.deadline) >= 0;
+  if (!project.recruiting) return false;
+  const days = daysUntil(project.deadline);
+  return days > 0 || (days === 0 && (project.deadlineHour == null ||
+    new Date().getHours() < Number(project.deadlineHour)));
 }
 
 export function deadlineLabel(project) {
   if (!isRecruiting(project)) return '모집 마감';
   const days = daysUntil(project.deadline);
   return days === 0 ? 'D-Day' : `D-${days}`;
+}
+
+function sampleReviewApplications() {
+  const samples = [
+    { applicant: '박서연', role: '프론트엔드 개발자', experience: 'React · TypeScript · 3년', status: 'review', introduction: 'React와 TypeScript로 대시보드를 만들어 왔어요.', motivation: '지역 데이터를 이해하기 쉽게 보여주는 화면을 만들고 싶어요.' },
+    { applicant: '최민준', role: '데이터 분석가', experience: 'SQL · Python · 데이터 시각화', status: 'accepted', introduction: '공공 데이터를 분석하고 시각화한 경험이 있어요.', motivation: '동네 상권의 변화와 원인을 찾아보고 싶어요.' },
+    { applicant: '한유진', role: '프론트엔드 개발자', experience: 'React · Figma · 2년', status: 'review', introduction: '디자이너와 협업하며 웹 서비스를 구현했어요.', motivation: '소상공인이 쉽게 사용하는 도구를 함께 만들고 싶어요.' },
+    { applicant: '정다운', role: '서비스 기획자', experience: '서비스 기획 · MVP 3회', status: 'rejected', introduction: '사용자 조사와 서비스 기획을 해 왔어요.', motivation: '지역 상권을 위한 제품의 문제를 정의하고 싶어요.' },
+  ];
+
+  return samples.map((sample, index) => ({
+    ...sample,
+    id: `review-sample-${index + 1}`,
+    projectId: '1',
+    date: localDate(-index),
+    isReviewSample: true,
+  }));
+}
+
+export function getOwnApplications(workspace) {
+  return workspace.applications.filter((application) => !application.isReviewSample);
+}
+
+export function getProjectCategories(project) {
+  if (Array.isArray(project.categories)) return project.categories;
+  return project.category ? [project.category] : [];
+}
+
+export function getProjectRoles(project) {
+  if (Array.isArray(project.roles)) return project.roles;
+  const title = project.roleTitle ?? project.category;
+  if (title === undefined && project.members === undefined) return [];
+  return [{ id: 'default', title: title ?? '', members: project.members ?? 1 }];
 }
 
 function initialWorkspace() {
@@ -63,63 +102,97 @@ function initialWorkspace() {
       },
     ],
     applications: [
-      { projectId: '2', date: '2025-04-08', status: 'accepted' },
-      { projectId: '3', date: '2025-04-05', status: 'review' },
-      { projectId: '4', date: '2025-03-28', status: 'rejected' },
-    ].map((application) => ({
-      ...application,
-      id: `sample-${application.projectId}`,
-      applicant: defaultProfile.name,
-    })),
+      ...sampleReviewApplications(),
+      ...[
+        { projectId: '2', date: '2025-04-08', status: 'accepted' },
+        { projectId: '3', date: '2025-04-05', status: 'review' },
+        { projectId: '4', date: '2025-03-28', status: 'rejected' },
+      ].map((application) => ({
+        ...application,
+        id: `sample-${application.projectId}`,
+        applicant: defaultProfile.name,
+      })),
+    ],
   };
 }
 
-export function loadWorkspace() {
+export function loadWorkspace(scope) {
   try {
-    const stored = JSON.parse(localStorage.getItem(storageKey));
+    const stored = JSON.parse(localStorage.getItem(scope ?? storageKey));
     if (Array.isArray(stored?.projects) && Array.isArray(stored?.applications)) {
+      const { major, ...profile } = stored.profile ?? {};
+      const majors = Array.isArray(profile.majors) ? profile.majors : [major];
+      const hasDemoPosting = stored.projects.some(({ id, managed }) => id === '1' && managed);
+      const hasOldDemoData = stored.applications.some(({ id }) => id === 'sample-2')
+        && !stored.applications.some(({ isReviewSample }) => isReviewSample);
       return {
         ...stored,
         mode: stored.mode === 'publisher' ? 'publisher' : 'applicant',
-        profile: { ...defaultProfile, ...stored.profile },
+        applications: hasDemoPosting && hasOldDemoData
+          ? [...sampleReviewApplications(), ...stored.applications]
+          : stored.applications,
+        profile: {
+          ...defaultProfile,
+          ...profile,
+          majors: [...new Set(majors
+            .filter((value) => typeof value === 'string')
+            .map((value) => value.trim())
+            .filter(Boolean))],
+        },
         savedProjectIds: Array.isArray(stored.savedProjectIds) ? stored.savedProjectIds : [],
       };
     }
   } catch {
     // Start with sample data when browser storage cannot be read.
   }
-  return initialWorkspace();
+  if (!scope) return initialWorkspace();
+  return {
+    mode: 'applicant',
+    profile: { ...defaultProfile, name: '사용자' },
+    savedProjectIds: [],
+    projects: [],
+    applications: [],
+  };
 }
 
-export function saveWorkspace(workspace) {
+export function saveWorkspace(workspace, scope) {
   try {
-    localStorage.setItem(storageKey, JSON.stringify(workspace));
+    localStorage.setItem(scope ?? storageKey, JSON.stringify(workspace));
     return true;
   } catch {
     return false;
   }
 }
 
-export function toggleSavedProject(workspace, projectId) {
+export function toggleSavedProject(workspace, projectId, knownProject = false) {
   const { savedProjectIds } = workspace;
   if (savedProjectIds.includes(projectId)) {
     return { ...workspace, savedProjectIds: savedProjectIds.filter((id) => id !== projectId) };
   }
 
-  if (!workspace.projects.some(({ id }) => id === projectId)) return workspace;
+  if (!knownProject && !workspace.projects.some(({ id }) => id === projectId)) return workspace;
   return { ...workspace, savedProjectIds: [projectId, ...savedProjectIds] };
 }
 
 export function addApplication(workspace, application) {
   const project = workspace.projects.find(({ id }) => id === application.projectId);
-  const duplicate = workspace.applications.some(({ projectId }) => projectId === application.projectId);
+  const duplicate = getOwnApplications(workspace).some(({ projectId }) => projectId === application.projectId);
   if (workspace.mode !== 'applicant' || !project || !isRecruiting(project) || duplicate) {
     return workspace;
   }
+  const roles = getProjectRoles(project);
+  const role = application.roleId ? roles.find(({ id }) => id === application.roleId) : roles[0];
+  if (!role) return workspace;
 
   return {
     ...workspace,
-    applications: [{ ...application, applicant: workspace.profile.name }, ...workspace.applications],
+    applications: [{
+      ...application,
+      applicant: workspace.profile.name,
+      roleId: role.id,
+      role: role.title,
+      experience: (workspace.profile.majors ?? []).join(' · '),
+    }, ...workspace.applications],
   };
 }
 
@@ -127,10 +200,21 @@ export function savePosting(workspace, posting) {
   if (workspace.mode !== 'publisher') return workspace;
   const existing = workspace.projects.find(({ id }) => id === posting.id);
   if (existing && !existing.managed) return workspace;
+  if (Array.isArray(posting.categories) && posting.categories.length === 0) return workspace;
+  if (posting.roles && (
+    posting.roles.length === 0 ||
+    new Set(posting.roles.map(({ id }) => id)).size !== posting.roles.length ||
+    posting.roles.some(({ id, title, members }) => !id || !title.trim() || !Number.isInteger(members) || members < 1 || members > 100)
+  )) return workspace;
 
+  const updated = {
+    ...posting,
+    ...(posting.roles && { members: posting.roles.reduce((total, role) => total + role.members, 0) }),
+    updatedAt: new Date().toISOString(),
+  };
   const projects = existing
-    ? workspace.projects.map((project) => project.id === posting.id ? { ...project, ...posting } : project)
-    : [{ ...posting, organizer: workspace.profile.name, managed: true, recruiting: true }, ...workspace.projects];
+    ? workspace.projects.map((project) => project.id === posting.id ? { ...project, ...updated } : project)
+    : [{ ...updated, organizer: workspace.profile.name, managed: true, recruiting: true }, ...workspace.projects];
   return { ...workspace, projects };
 }
 

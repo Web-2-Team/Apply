@@ -1,17 +1,35 @@
+import { useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CommonInput from "../../components/Input/Input";
 import CommonButton from "../../components/Button/Button";
+import { getProjectSession, projectApiBaseUrl, subscribeProjectSession } from "../../data/projectSession";
 import { routes } from "../../router/routes";
 import "./LoginPage.styles.css";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const session = useSyncExternalStore(subscribeProjectSession, getProjectSession);
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
     navigate(routes.projects);
   };
+
+  if (projectApiBaseUrl) {
+    return (
+      <main className="login-page">
+        <div className="login-container">
+          <h1>로그인</h1>
+          {session ? (
+            <Link className="login-link" to={routes.projects}>프로젝트로 이동</Link>
+          ) : (
+            <p className="login-description">공고 API를 사용하려면 백엔드 로그인 연동이 필요해요.</p>
+          )}
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="login-page">

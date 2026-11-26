@@ -7,5 +7,8 @@ export const routes = {
   applications: '/applications',
   savedProjects: '/saved',
   postings: '/postings',
+  newPosting: '/postings/new',
+  editPosting: (projectId: string | number = ':projectId') => `/postings/${projectId}/edit`,
+  reviewPosting: (projectId: string | number = ':projectId') => `/postings/${projectId}/review`,
   profile: '/profile',
 } as const;
