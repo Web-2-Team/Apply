@@ -1,0 +1,61 @@
+.profile-settings {
+  width: min(100% - 40px, 680px);
+  margin: 0 auto;
+  padding-block: 24px 48px;
+}
+
+.profile-settings h1 {
+  margin: 0 0 20px;
+  font-size: 22px;
+}
+
+.profile-settings-card {
+  margin-bottom: 14px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.profile-settings-card h2 {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.profile-settings-card p {
+  margin: 0 0 12px;
+  color: var(--secondary);
+  line-height: 1.5;
+}
+
+.profile-settings-form {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: var(--secondary);
+}
+
+.profile-settings .profile-settings-error {
+  margin: 0;
+  color: #a12735;
+}
+
+.profile-settings .common-button {
+  padding: 9px 14px;
+  font-size: 13px;
+}
+
+@media (max-width: 480px) {
+  .profile-settings {
+    width: calc(100% - 24px);
+  }
+  .profile-settings-card {
+    padding: 12px;
+  }
+}
