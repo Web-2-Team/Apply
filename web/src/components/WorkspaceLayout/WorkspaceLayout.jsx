@@ -64,6 +64,14 @@ function Workspace({ scope, projectApi, apiUserId }) {
     if (!projectApi || apiUserId) saveWorkspace(storedWorkspace, scope);
   }, [storedWorkspace, scope, projectApi, apiUserId]);
 
+  function saveProfile(profile) {
+    if (projectApi && !apiUserId) return false;
+    const updated = { ...storedWorkspace, profile };
+    if (!saveWorkspace(updated, scope)) return false;
+    setWorkspace(updated);
+    return true;
+  }
+
   function savePostingDraft(draftKey, draft) {
     const updated = {
       ...storedWorkspace,
@@ -219,6 +227,7 @@ function Workspace({ scope, projectApi, apiUserId }) {
           context={{
             workspace,
             setWorkspace,
+            saveProfile,
             savePostingDraft,
             requestPublisherMode,
             openProjects,

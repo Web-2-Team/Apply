@@ -47,7 +47,11 @@ function SignupPage() {
           이름과 이메일을 이 브라우저의 데모 프로필에 저장해요.
         </p>
 
-        <form className="signup-form" onSubmit={handleSubmit}>
+        <form
+          className="signup-form"
+          onSubmit={handleSubmit}
+          onChange={() => setMessage("")}
+        >
           <CommonInput
             label="이름"
             value={name}

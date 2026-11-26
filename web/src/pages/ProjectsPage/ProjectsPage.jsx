@@ -152,7 +152,7 @@ function ProjectsPage() {
 function compareDeadlines(first, second) {
   return (
     first.deadline.localeCompare(second.deadline) ||
-    (first.deadlineHour ?? "").localeCompare(second.deadlineHour ?? "")
+    Number(first.deadlineHour ?? 24) - Number(second.deadlineHour ?? 24)
   );
 }
 

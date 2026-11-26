@@ -9,7 +9,7 @@ import "./ProfilePage.styles.css";
 function ProfilePage() {
   const {
     workspace: { profile },
-    setWorkspace,
+    saveProfile,
   } = useOutletContext();
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
@@ -34,7 +34,11 @@ function ProfilePage() {
       return;
     }
 
-    setWorkspace((current) => ({ ...current, profile: nextProfile }));
+    if (!saveProfile(nextProfile)) {
+      setFeedback("");
+      setError("프로필 정보를 저장할 수 없어요. 로그인 상태와 저장 공간을 확인해 주세요.");
+      return;
+    }
     setFeedback("프로필 정보를 저장했어요.");
     setError("");
   }
