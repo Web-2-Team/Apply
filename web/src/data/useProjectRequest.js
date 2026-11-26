@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export default function useProjectRequest(request) {
   const [completed, setCompleted] = useState(null);
@@ -10,10 +10,18 @@ export default function useProjectRequest(request) {
     async function load() {
       try {
         const data = await request(controller.signal);
-        if (!controller.signal.aborted) setCompleted({ request, version, data });
+        if (!controller.signal.aborted)
+          setCompleted({ request, version, data });
       } catch (error) {
         if (!controller.signal.aborted) {
-          setCompleted({ request, version, error: error instanceof Error ? error.message : '공고 정보를 불러오지 못했어요.' });
+          setCompleted({
+            request,
+            version,
+            error:
+              error instanceof Error
+                ? error.message
+                : "공고 정보를 불러오지 못했어요.",
+          });
         }
       }
     }
@@ -21,10 +29,13 @@ export default function useProjectRequest(request) {
     return () => controller.abort();
   }, [request, version]);
 
-  const result = completed?.request === request && completed.version === version ? completed : null;
+  const result =
+    completed?.request === request && completed.version === version
+      ? completed
+      : null;
   return {
     data: result?.data,
-    error: result?.error ?? '',
+    error: result?.error ?? "",
     loading: Boolean(request && !result),
     reload: () => setVersion((current) => current + 1),
   };

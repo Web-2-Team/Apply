@@ -84,10 +84,24 @@ function ProjectFilter({ label, value, options, onChange }) {
         closeList();
         break;
       default: {
-        if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) return;
+        if (
+          event.key.length !== 1 ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.altKey
+        )
+          return;
         const letter = event.key.toLowerCase();
-        const indexAfter = options.findIndex((option, index) => index > activeIndex && option.toLowerCase().startsWith(letter));
-        const match = indexAfter === -1 ? options.findIndex((option) => option.toLowerCase().startsWith(letter)) : indexAfter;
+        const indexAfter = options.findIndex(
+          (option, index) =>
+            index > activeIndex && option.toLowerCase().startsWith(letter),
+        );
+        const match =
+          indexAfter === -1
+            ? options.findIndex((option) =>
+                option.toLowerCase().startsWith(letter),
+              )
+            : indexAfter;
         if (match !== -1) {
           event.preventDefault();
           setActiveIndex(match);
@@ -103,7 +117,8 @@ function ProjectFilter({ label, value, options, onChange }) {
         className="projects-filter-select"
         ref={fieldRef}
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+          if (!event.currentTarget.contains(event.relatedTarget))
+            setOpen(false);
         }}
       >
         <button
@@ -114,7 +129,7 @@ function ProjectFilter({ label, value, options, onChange }) {
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={open ? listId : undefined}
-          onClick={() => open ? closeList() : openList()}
+          onClick={() => (open ? closeList() : openList())}
           onKeyDown={(event) => {
             if (event.key === "ArrowDown" || event.key === "ArrowUp") {
               event.preventDefault();

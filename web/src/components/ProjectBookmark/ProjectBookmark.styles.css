@@ -9,12 +9,12 @@
 }
 
 .project-bookmark.common-button:hover,
-.project-bookmark.common-button[aria-pressed='true'] {
+.project-bookmark.common-button[aria-pressed="true"] {
   border-color: var(--brand);
   background: var(--brand-subtle);
   color: var(--brand);
 }
 
-.project-bookmark[aria-pressed='true'] svg {
+.project-bookmark[aria-pressed="true"] svg {
   fill: currentColor;
 }

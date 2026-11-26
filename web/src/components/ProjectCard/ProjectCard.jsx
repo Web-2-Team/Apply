@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
-import { deadlineLabel, getProjectCategories } from '../../data/workspace';
-import { routes } from '../../router/routes';
-import ProjectBookmark from '../ProjectBookmark/ProjectBookmark';
-import './ProjectCard.styles.css';
+import { Link } from "react-router-dom";
+import { deadlineLabel, getProjectCategories } from "../../data/workspace";
+import { routes } from "../../router/routes";
+import ProjectBookmark from "../ProjectBookmark/ProjectBookmark";
+import "./ProjectCard.styles.css";
 
 function ProjectCard({ project }) {
   const categories = getProjectCategories(project);
@@ -15,7 +15,9 @@ function ProjectCard({ project }) {
         <p>{project.description}</p>
         {(categories.length > 0 || project.members != null) && (
           <div className="project-tile-meta">
-            {categories.map((category) => <span key={category}>{category}</span>)}
+            {categories.map((category) => (
+              <span key={category}>{category}</span>
+            ))}
             {project.members != null && <small>모집 {project.members}명</small>}
           </div>
         )}

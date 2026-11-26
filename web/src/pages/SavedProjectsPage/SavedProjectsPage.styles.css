@@ -25,9 +25,15 @@
   text-align: center;
 }
 
-.saved-projects-empty p { margin: 0 0 10px; }
-.saved-projects-empty a { color: var(--brand); }
+.saved-projects-empty p {
+  margin: 0 0 10px;
+}
+.saved-projects-empty a {
+  color: var(--brand);
+}
 
 @media (max-width: 760px) {
-  .saved-projects { width: calc(100% - 24px); }
+  .saved-projects {
+    width: calc(100% - 24px);
+  }
 }

@@ -25,18 +25,19 @@ function ApplicationsPage() {
           <span>전체 지원</span>
           <strong>{applications.length}</strong>
         </article>
-        {!projectApi && Object.entries(applicationStatuses).map(([status, { label }]) => (
-          <article key={status}>
-            <span>{label}</span>
-            <strong>
-              {
-                applications.filter(
-                  (application) => application.status === status,
-                ).length
-              }
-            </strong>
-          </article>
-        ))}
+        {!projectApi &&
+          Object.entries(applicationStatuses).map(([status, { label }]) => (
+            <article key={status}>
+              <span>{label}</span>
+              <strong>
+                {
+                  applications.filter(
+                    (application) => application.status === status,
+                  ).length
+                }
+              </strong>
+            </article>
+          ))}
       </section>
 
       <div className="applications-list-heading">
@@ -53,7 +54,11 @@ function ApplicationsPage() {
           return (
             <article className="application-item" key={application.id}>
               <div className="application-copy">
-                <h3>{project?.title ?? application.projectTitle ?? "프로젝트 공고"}</h3>
+                <h3>
+                  {project?.title ??
+                    application.projectTitle ??
+                    "프로젝트 공고"}
+                </h3>
                 {application.role && <span>{application.role}</span>}
                 <time dateTime={application.date}>
                   {application.date.replaceAll("-", ".")}
@@ -65,7 +70,9 @@ function ApplicationsPage() {
               >
                 공고 보기&nbsp; ›
               </Link>
-              <span className={`application-status ${tone}`}>{projectApi ? "지원 완료" : label}</span>
+              <span className={`application-status ${tone}`}>
+                {projectApi ? "지원 완료" : label}
+              </span>
             </article>
           );
         })}

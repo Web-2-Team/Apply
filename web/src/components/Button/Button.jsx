@@ -1,13 +1,13 @@
-import './Button.styles.css';
+import "./Button.styles.css";
 
 function CommonButton({
   children,
   onClick,
-  type = 'button',
-  variant = 'primary',
+  type = "button",
+  variant = "primary",
   disabled = false,
   loading = false,
-  className = '',
+  className = "",
   ...props
 }) {
   return (
@@ -19,11 +19,9 @@ function CommonButton({
       disabled={disabled || loading}
       aria-busy={loading}
     >
-      {loading ? '처리 중...' : children}
+      {loading ? "처리 중..." : children}
     </button>
   );
 }
 
 export default CommonButton;
-
-

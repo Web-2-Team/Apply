@@ -162,7 +162,9 @@
   cursor: pointer;
 }
 
-.workspace-search button:hover { color: var(--brand); }
+.workspace-search button:hover {
+  color: var(--brand);
+}
 
 .workspace-search input {
   min-width: 0;
@@ -196,11 +198,29 @@
 }
 
 @media (max-width: 760px) {
-  .workspace-layout { --workspace-sidebar-width: 112px; }
-  .workspace-sidebar { padding-inline: 7px; }
-  .workspace-logo { justify-content: center; padding-left: 0; }
-  .workspace-nav-item { gap: 5px; padding-inline: 5px; font-size: 10px; }
-  .workspace-sidebar-user { gap: 5px; padding-inline: 2px; }
-  .workspace-topbar { padding-inline: 10px; }
-  .workspace-user-mode { gap: 5px; }
+  .workspace-layout {
+    --workspace-sidebar-width: 112px;
+  }
+  .workspace-sidebar {
+    padding-inline: 7px;
+  }
+  .workspace-logo {
+    justify-content: center;
+    padding-left: 0;
+  }
+  .workspace-nav-item {
+    gap: 5px;
+    padding-inline: 5px;
+    font-size: 10px;
+  }
+  .workspace-sidebar-user {
+    gap: 5px;
+    padding-inline: 2px;
+  }
+  .workspace-topbar {
+    padding-inline: 10px;
+  }
+  .workspace-user-mode {
+    gap: 5px;
+  }
 }
